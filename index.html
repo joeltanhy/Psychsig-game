@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PsychSIG Play</title>
+
+<style>
+* {box-sizing:border-box}
+body {
+  background:#19132b;
+  color:white;
+  font-family:Arial,sans-serif;
+  padding:20px;
+  margin:0;
+}
+.card {
+  max-width:480px;
+  margin:35px auto;
+  background:#302447;
+  padding:25px;
+  border-radius:22px;
+}
+h1 {color:#d7b4ff}
+.tag {color:#d7b4ff;font-size:12px;letter-spacing:2px}
+button {
+  display:block;
+  width:100%;
+  background:#493761;
+  color:white;
+  border:1px solid #8466a3;
+  border-radius:12px;
+  padding:16px;
+  margin:12px 0;
+  font-size:16px;
+  text-align:left;
+}
+button:disabled {opacity:.85}
+.correct {background:#26735a}
+.wrong {background:#a34459}
+#next {
+  background:#b890ff;
+  color:#19132b;
+  text-align:center;
+  font-weight:bold;
+}
+#feedback {line-height:1.5}
+</style>
+</head>
+
+<body>
+<div class="card">
+
+<div class="tag">PSYCHSIG MINI GAME 01</div>
+
+<h1>Spot the Thought Trap</h1>
+
+<p id="progress"></p>
+<h2 id="question"></h2>
+
+<div id="answers"></div>
+<p id="feedback"></p>
+
+<button id="next" onclick="nextRound()" hidden>
+Next Round →
+</button>
+
+</div>
+
+<script>
+const questions = [
+{
+q:"I made ONE mistake in my presentation. The whole thing was a disaster.",
+a:["Mind reading","All-or-nothing thinking","Personalisation"],
+correct:1,
+why:"One mistake is being used to judge the entire presentation."
+},
+{
+q:"My friend hasn't replied. She must be annoyed with me.",
+a:["Mind reading","Catastrophising","Emotional reasoning"],
+correct:0,
+why:"You are assuming you know another person's thoughts without sufficient evidence."
+},
+{
+q:"I feel incompetent. Therefore, I must actually be incompetent.",
+a:["Overgeneralisation","Labelling","Emotional reasoning"],
+correct:2,
+why:"A feeling is being treated as evidence of an objective fact."
+}
+];
+
+let round=0;
+let score=0;
+let answered=false;
+
+function render(){
+  if(round>=questions.length){
+    document.getElementById("progress").textContent="GAME COMPLETE!";
+    document.getElementById("question").textContent=
+      "Your score: "+score+" / 300";
+    document.getElementById("answers").innerHTML="";
+    document.getElementById("feedback").textContent=
+      "Thanks for playing PsychSIG!";
+    let next=document.getElementById("next");
+    next.textContent="Play Again";
+    next.hidden=false;
+    return;
+  }
+
+  answered=false;
+  let q=questions[round];
+
+  document.getElementById("progress").textContent=
+    "Round "+(round+1)+"/3 | Score: "+score;
+
+  document.getElementById("question").textContent=q.q;
+  document.getElementById("feedback").textContent="";
+  document.getElementById("next").hidden=true;
+
+  let container=document.getElementById("answers");
+  container.innerHTML="";
+
+  q.a.forEach((answer,i)=>{
+    let b=document.createElement("button");
+    b.textContent=answer;
+    b.onclick=()=>choose(i);
+    container.appendChild(b);
+  });
+}
+
+function choose(i){
+  if(answered)return;
+  answered=true;
+
+  let q=questions[round];
+  let buttons=document.querySelectorAll("#answers button");
+
+  buttons.forEach((b,j)=>{
+    b.disabled=true;
+    if(j===q.correct)b.classList.add("correct");
+    if(j===i && i!==q.correct)b.classList.add("wrong");
+  });
+
+  if(i===q.correct)score+=100;
+
+  document.getElementById("feedback").textContent=
+    (i===q.correct?"Correct! ":"Not quite! ")+q.why;
+
+  document.getElementById("next").hidden=false;
+  document.getElementById("next").textContent=
+    round===2?"See Results":"Next Round →";
+}
+
+function nextRound(){
+  if(round>=questions.length){
+    round=0;
+    score=0;
+  }else{
+    round++;
+  }
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
